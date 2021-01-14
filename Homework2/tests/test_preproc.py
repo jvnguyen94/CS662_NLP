@@ -24,6 +24,7 @@ def test_d1_1_bow():
     eq_(x_train[410]['angels'], 0)
     eq_(len(x_train[1144]), 124)
     
+
 def test_d1_2_agg():
     global x_dev
 
@@ -31,10 +32,12 @@ def test_d1_2_agg():
     eq_(len(counts_dev),9006)
     eq_(counts_dev['money'],92)
 
+
 def test_d1_3_oov():
     global counts_train, counts_dev
     eq_(len(preproc.compute_oov(counts_dev,counts_train)),2677)
     eq_(len(preproc.compute_oov(counts_train,counts_dev)),30459)
+
 
 def test_d1_4_prune():
     global x_dev, counts_train
