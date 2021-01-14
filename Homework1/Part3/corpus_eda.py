@@ -18,6 +18,50 @@ import numpy as np
 
 path = "/Users/nguyjust/CS662_NLP/Homework1/"
 
+# %%###############################################################
+### Function to display top 30 keys of dictionary based on value
+###################################################################
+
+def dict_sorter(dct, num_display):
+    ## Make sure given obj is dict
+    dct = dict(dct)
+    ## sort object into list - high to low
+    sorted_dict_list = sorted(
+        dct.items(), key=lambda x: x[1], reverse=True)
+    ## print out key,value for top num_display based on the value
+    for item in sorted_dict_list[0:num_display]:
+	    print(item[0], item[1])
+
+
+
+# %%###############################################################
+## Function to calc bigram PMI based on threshold of bigram count
+###################################################################
+
+def pmi_bigram_thresh(bigram_counts, unigram_counts, threshold):
+    ## Keep bigram if greater than threshold
+    culled_bi_counts = {key: value for key,
+                        value in bigram_counts.items() if value > threshold}
+    ## Total num bigrams ... so use later to calc bigram probability
+    total_bigram = len(culled_bi_counts)
+    ## Create new dict for biram prob and calculate based on bigram total
+    bigrams_prob = culled_bi_counts
+    for key in bigrams_prob:
+        bigrams_prob[key] /= total_bigram
+
+    ## Calculate PMI based on bigram prob and unigram prob
+    pmi = {}
+    bigrams_pairs = list(bigrams_prob.keys())
+    for pair in bigrams_pairs:
+        w1w2 = bigrams_prob[pair]
+        w1 = unigram_counts[pair[0]]
+        w2 = unigram_counts[pair[1]]
+        pmi_w1w2 = w1w2 / (w1*w2)
+        pmi[pair] = pmi_w1w2
+    ## Print out result for top 30 results
+    dict_sorter(pmi, 30)
+    #return pmi
+
 
 
 #%%###########################################################################################
@@ -43,7 +87,7 @@ print(corp_word_tok[0:2])
 
 
 #%%###############################################################################################
-## EDA in corpus
+## EDA in corpus - Word counting & distribution
 ##############################################################################################
 
 # Put all words into a single list
@@ -74,11 +118,8 @@ type_counts = dict(Counter(total_corpus))
 #print(type(type_counts))
 #type_counts.sort(reverse=True)
 
-## Sort the dictionary based on the values (of counts)
-sorted_type_counts = sorted(type_counts.items(), key=lambda x: x[1], reverse=True)
-## Print out top 30 most occurring words
-for word in sorted_type_counts[0:30]:
-	print(word[0], word[1])
+## Print top 30 words
+dict_sorter(type_counts, 30)
 
 
 #%% 3) Produce a rank-frequency plot (similar to those seen on the Wikipedia page for Zipf’s Law) for this corpus.
@@ -104,7 +145,7 @@ plt.show()
 stopwords = list(nltk.corpus.stopwords.words('english'))
 #print(stopwords)
 print("NLTK number of stopwords")
-print(len(stopwords))ß
+print(len(stopwords))
 ## Convert stop words to upper to match my corpus
 stopwords = [word.upper() for word in stopwords]
 
@@ -131,8 +172,74 @@ sorted_type_counts_noStop = sorted(type_counts_noStop.items(), key=lambda x: x[1
 for word in sorted_type_counts_noStop[0:30]:
 	print(word[0], word[1])
 
+
+
+#%%###############################################################################################
+## EDA in corpus - Word association metrics
+##############################################################################################
+
+## Calculate unigram probabilities by divide by # of unigrams in corpus
+corpus_unigrams_prob = sorted_type_counts_dict
+for key in corpus_unigrams_prob:
+    corpus_unigrams_prob[key] /=66481
+
+## Sort and print out Unigram probabilities
+dict_sorter(corpus_unigrams_prob, 30)
+
+## Get all the bigrams for the corpus
+corpus_bigrams = nltk.bigrams(total_corpus)
+corpus_bigrams = list(corpus_bigrams)
+
+print("Total bigrams")
+total_bigrams = len(corpus_bigrams)
+
+print(total_bigrams)
+
+## Get counts of all bigrams
+counts_bigrams = dict(Counter(corpus_bigrams))
+
+dict_sorter(counts_bigrams, 30)
+
+## Calculate bigram probabilities by divide by total num of bigrams
+corpus_bigrams_prob = counts_bigrams
+for key in corpus_bigrams_prob:
+    corpus_bigrams_prob[key] /= 15710622
+
+dict_sorter(corpus_bigrams_prob, 30)
+
 # %%
-print(stopwords)
+## 1) examine the 30 highest-PMI word pairs, along with their unigram and bigram frequencies. What do you notice?
+
+pmi_corpus = {}
+
+## Get all bigram pairs and calc PMI
+bigrams_pairs = list(corpus_bigrams_prob.keys())
+for pair in bigrams_pairs:
+    w1w2 = corpus_bigrams_prob[pair]
+    w1 = corpus_unigrams_prob[pair[0]]
+    w2 = corpus_unigrams_prob[pair[1]]
+    pmi_w1w2 = w1w2 / (w1*w2)
+    pmi_corpus[pair] = pmi_w1w2
+## print out top 30 PMI    
+dict_sorter(pmi_corpus, 30)
 
 
+# %% 2) Experiment with a few different threshold values, and report on what you observe.
+### HW Q3: With a threshold of 100, what are the 10 highest-PMI word pairs?
+### HW Q4: With a threshold of 100, what are the 10 highest-PMI word pairs?
+counts_bigrams = dict(Counter(corpus_bigrams))
+print("threshold 10")
+pmi_bigram_thresh(counts_bigrams, corpus_unigrams_prob, 10)
+
+print("\n threshold 100")
+pmi_bigram_thresh(counts_bigrams, corpus_unigrams_prob, 100)
+
+print("\n threshold 1000")
+pmi_bigram_thresh(counts_bigrams, corpus_unigrams_prob, 1000)
+
+print("\n threshold 10,000")
+pmi_bigram_thresh(counts_bigrams, corpus_unigrams_prob, 10000)
+
+print("\n threshold 100,000")
+pmi_bigram_thresh(counts_bigrams, corpus_unigrams_prob, 100000)
 
