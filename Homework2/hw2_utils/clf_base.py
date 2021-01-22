@@ -1,7 +1,7 @@
 from hw2_utils.constants import OFFSET
 import numpy as np
 
-# HELPER FUNCTION
+## HELPER FUNCTION
 def argmax(score_dict):
     """
     Find the 
@@ -14,7 +14,8 @@ def argmax(score_dict):
     return items[np.argmax([i[1] for i in items])][0]
 
 
-# deliverable 2.1
+
+## deliverable 2.1
 def make_feature_vector(base_features, label):
     """
     Take a dict of bag-of-words features and a label; return a dict of features, corresponding to f(x,y)
@@ -24,8 +25,22 @@ def make_feature_vector(base_features, label):
     :returns dict of features, f(x,y)
     :rtype: dict
     """
-    raise NotImplementedError
-    
+
+    ## Initialize empty dict for writing out feature vector
+    ft_dict = {}
+
+    ## iterate through each feature and write out as following into dict:
+    ## (label, ft_name): value
+    for ft in base_features:
+        ft_dict[(label, ft)] = float(base_features[ft])
+
+    ## Add in the offset    
+    ft_dict[(label, OFFSET)] = 1.0
+
+    return ft_dict
+
+
+
 # deliverable 2.2
 def predict(base_features, weights, labels):
     """
@@ -37,8 +52,26 @@ def predict(base_features, weights, labels):
     :returns: top-scoring label, plus the scores of all labels
     :rtype: string, dict
     """
-    raise NotImplementedError
     
+    ## Create dictionary for score to be updated, iteratively
+    ## Set all scores for labels to be 0
+    score = dict()
+    for label in labels:
+        score[label] = 0.0
+
+    ## Iterate through each label and feature combo and update the weights    
+    for label in labels:
+        for feature in base_features:
+            score[label] += weights[(label, feature)] * base_features[feature]
+        score[label] += weights[(label, OFFSET)] * 1
+
+    ## Get argmax of score
+    top_score = argmax(score)
+
+    return top_score, score
+
+
+
 def predict_all(x, weights, labels):
     """
     Predict the label for all instances in a dataset. For bulk prediction.
@@ -49,6 +82,8 @@ def predict_all(x, weights, labels):
     :returns: predictions for each instance
     :rtype: numpy array
     """
+   
     y_hat = np.array([predict(x_i, weights, labels)[0] for x_i in x])
+   
     return y_hat
     

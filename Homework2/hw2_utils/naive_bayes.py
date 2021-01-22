@@ -18,7 +18,21 @@ def get_corpus_counts(x,y,label):
     :rtype: defaultdict
 
     """
-    raise NotImplementedError
+    ## Initialize counter to keep track
+    counts = Counter()
+
+    ## Index for y to keep track of place in list
+    for (idx, obj) in enumerate(y):
+        ## If matches desired label... 
+        if obj == label:
+            ## Add the counts and save to counter
+            counts.update(x[idx])   
+
+    ## Convert to defaultdict to handle missingness
+    counts = defaultdict(int, counts)
+    
+    return counts
+
 
 
 # deliverable 3.2
@@ -32,11 +46,30 @@ def estimate_pxy(x,y,label,smoothing,vocab):
     :param smoothing: additive smoothing amount
     :param vocab: list of words in vocabulary
     :returns: defaultdict of log probabilities per word
-    :rtype: defaultdict of log probabilities per word
+    :rtype: defaultdict 
 
     """
-    raise NotImplementedError
+    ## Probability of word P(word | label)
+    ## phi  = [smooth_hyperparam + count(y,j)] / [abs(vocab) + sigma(count(y, j'))]
+   
+   ## Get corpus counts for given label
+    corpus_counts = get_corpus_counts(x, y, label)
+
+    ## Sum all TOTAL NUMBER of words in the corpus
+    ## Lesson: CANNOT just take the len(dict)... I had to sum(dict items)
+    corpus_total_len = sum(corpus_counts.values())
+
+    ## Get length of the vocabulary
+    v = len(vocab)
+
+    ## For each word in vocab... calculate the log phi
+    word_prob =  defaultdict(float)
+    for (word, _) in vocab:
+        word_prob[word] = np.log(corpus_counts[word] + smoothing) - np.log((v * smoothing) + corpus_total_len)
+
+    return word_prob
     
+
 
 # deliverable 3.3
 def estimate_nb(x,y,smoothing):
@@ -55,7 +88,6 @@ def estimate_nb(x,y,smoothing):
     counts = defaultdict(float)
     doc_counts = defaultdict(float)
     
-    raise NotImplementedError
     
 
 # deliverable 3.4
@@ -72,5 +104,4 @@ def find_best_smoother(x_tr,y_tr,x_dv,y_dv,smoothers):
     :rtype: float, dict mapping smoothing value to score
     """
 
-    raise NotImplementedError
     
