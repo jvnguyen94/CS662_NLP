@@ -1,6 +1,7 @@
 from sklearn.linear_model import LogisticRegression
 from sklearn.feature_extraction.text import TfidfTransformer
 
+
 # deliverable 5.1
 def train_logistic_regression(X, y):
     """
@@ -13,7 +14,15 @@ def train_logistic_regression(X, y):
     :returns: a trained logistic regression classifier
     :rtype sklearn.linear_model.LogisticRegression
     """
-    raise NotImplementedError
+    ## Logistic regression model
+    lr = LogisticRegression(multi_class='multinomial', solver='saga', penalty='l2')
+
+    lr.fit(X, y)
+    print(lr)
+
+    return lr
+   
+   
 
 def transform_tf_idf(X_train_counts, X_dev_counts, X_test_counts):
     """
@@ -23,4 +32,7 @@ def transform_tf_idf(X_train_counts, X_dev_counts, X_test_counts):
     :returns: a tuple of tf-idf transformed count matrices for train/dev/test (in that order), as well as the resulting transformer
     :rtype ((sparse, sparse, sparse), TfidfTransformer)
     """
-    raise NotImplementedError
+    tfidf = TfidfTransformer()
+    tfidf.fit(X_train_counts)
+
+    return ((tfidf.transform(X_train_counts), tfidf.transform(X_dev_counts), tfidf.transform(X_test_counts)), tfidf)

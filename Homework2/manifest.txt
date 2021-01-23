@@ -1,4 +1,4 @@
-hw2.ipynb
+nguyen_justine_CS662_hw2.ipynb
 nb-best-test.preds
 nb-dev.preds
 nb-test.preds

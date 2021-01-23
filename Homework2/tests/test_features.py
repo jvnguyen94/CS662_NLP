@@ -14,8 +14,6 @@ def setup_module():
 
     label_set = sorted(list(set(y_tr)))
 
-
-
 def test_d4_1_token_type_ratio():
     global x_tr_pruned
     
@@ -25,7 +23,6 @@ def test_d4_1_token_type_ratio():
     assert_almost_equals(ratios[2], 1.91139, places=2)
     assert_almost_equals(ratios[3], 2.31884, places=2)
     assert_almost_equals(ratios[4], 6.18868, places=2)
-    
     
     
 def test_d4_2_discretize():

@@ -21,6 +21,10 @@ def get_corpus_counts(x,y,label):
     ## Initialize counter to keep track
     counts = Counter()
 
+    if label == None:
+        for (idx, obj) in enumerate(y):
+            counts.update(x[idx])
+
     ## Index for y to keep track of place in list
     for (idx, obj) in enumerate(y):
         ## If matches desired label... 
@@ -30,7 +34,7 @@ def get_corpus_counts(x,y,label):
 
     ## Convert to defaultdict to handle missingness
     counts = defaultdict(int, counts)
-    
+
     return counts
 
 
@@ -84,11 +88,25 @@ def estimate_nb(x,y,smoothing):
 
     """
     
-    labels = set(y)
+    labels = set(y) 
     counts = defaultdict(float)
     doc_counts = defaultdict(float)
+ 
+    ## Aggregregate all counts for words
+    for item in x:
+        counts.update(item)
+    vocab = list(counts.items())
     
-    
+    ## Words per label
+    label_counts = Counter(y)
+
+    ## Iterate through each label and update the nb
+    for label in labels:
+        doc_counts.update(estimate_pxy(x, y, label, smoothing, vocab))
+        doc_counts.update({(label, OFFSET): np.log(label_counts[label]/len(vocab))})
+
+    return doc_counts
+
 
 # deliverable 3.4
 def find_best_smoother(x_tr,y_tr,x_dv,y_dv,smoothers):
@@ -103,5 +121,28 @@ def find_best_smoother(x_tr,y_tr,x_dv,y_dv,smoothers):
     :returns: best smoothing value, scores
     :rtype: float, dict mapping smoothing value to score
     """
+  
+    ## Get all unique labels
+    labels = np.unique(y_tr)
 
-    
+    ## Keep track of top accuracy and top smoother by performance
+    top_accuracy = 0
+    top_smoother = None
+    scores = {}
+
+    ## Try all val in smoothers
+    for val in smoothers:
+        ## Estimate nb
+        nb_estimate = estimate_nb(x_tr, y_tr, val)
+        ## Predict on the dev set
+        y_hat = clf_base.predict_all(x_dv, nb_estimate, labels)
+        ## Get the accuracy
+        accuracy = evaluation.acc(y_hat, y_dv)
+        ## Append the score
+        scores[val] = accuracy
+        ## Re-write top if this iter does better
+        if accuracy > top_accuracy:
+            top_accuracy = accuracy
+            top_smoother = val
+
+    return top_smoother, scores
