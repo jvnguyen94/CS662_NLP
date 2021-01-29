@@ -1,4 +1,4 @@
-hw3.ipynb
+nguyen_justine_hw3.ipynb
 hw3_utils/*.py
 deliverable_2.4.csv
 deliverable_2.4.txt
