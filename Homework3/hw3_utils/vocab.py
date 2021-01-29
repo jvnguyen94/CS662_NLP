@@ -86,6 +86,19 @@ def sentence_to_vector(s, vocab, pad_with_bos=False):
     :returns: a list of the character indicies found in `s`
     :rtype: list
     """
+    ## Vecterize the string into characters
+    s = list(s)
+
+    ## If wanted string padding... add BOS_SYM/EOS_SYM vars into string
+    if pad_with_bos == True:
+        s.insert(0, BOS_SYM)
+        s.insert(len(s), EOS_SYM)
+
+    ## Get index from vocab for character in s
+    s_idx = [vocab[char] for char in s]
+    
+
+    return s_idx
     
     
 def sentence_to_tensor(s, vocab, pad_with_bos=False):
