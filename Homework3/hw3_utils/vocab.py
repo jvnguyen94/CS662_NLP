@@ -109,7 +109,9 @@ def sentence_to_tensor(s, vocab, pad_with_bos=False):
     :returns: (1, n) tensor where n=len(s) and the values are character indicies
     :rtype: torch.Tensor
     """
-    
+    s_list = sentence_to_vector(s, vocab, pad_with_bos)
+    s_tensor = torch.Tensor([s_list])
+    return s_tensor
 
 def build_label_vocab(labels):
     """
