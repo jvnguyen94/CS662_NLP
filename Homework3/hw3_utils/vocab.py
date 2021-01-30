@@ -109,9 +109,14 @@ def sentence_to_tensor(s, vocab, pad_with_bos=False):
     :returns: (1, n) tensor where n=len(s) and the values are character indicies
     :rtype: torch.Tensor
     """
+    ## Get sentence to vector
     s_list = sentence_to_vector(s, vocab, pad_with_bos)
+
+    ## Convert to tensor obj
     s_tensor = torch.Tensor([s_list])
+
     return s_tensor
+
 
 def build_label_vocab(labels):
     """
@@ -123,3 +128,10 @@ def build_label_vocab(labels):
     :returns: two dictionaries, one mapping label to indicies and the other mapping indicies to label
     :rtype: dict-like object, dict-like object
     """
+    ## map idx to label
+    i2l = dict(enumerate(set(labels)))
+
+    ## invert to map label to idx
+    l2i = {value: key for key, value in i2l.items()}
+
+    return l2i, i2l
