@@ -1,0 +1,15 @@
+I experimented with three different models and they are as the following:
+Model 1: increase hidden and embedded layers 5x than original model
+Model 2: increase LSTM layers 5x than original model
+Model 3: increase number of epochs 5x than original model
+
+The initial baseline model performed with 59.49%.
+
+
+Model 1: After increasing the hidden and embedded layers, the performance of the model drastically increased across all the class labels. There is still confusion between Italian and Spanish, but across the other labels, performance is increased as there are more layers to learn the nuances amongst the languages. Accuracy overall was 93.55%.
+
+Model 2: I noticed that increasing the LSTM layers increased the training time (when looking at Model 1!). The performance of the model was only 54.87%, a drop from the initial baseline model. Looking at the confusion matrix, there was still a lot of confusion amongst English, French, Italian, and Spanish. The model did not improve that much. I also noticed that the average loss per item did not decrease that drastically over training the one epoch.
+
+Model 3: The model performed with 91.62%. Training for this model took the longest because I picked to do 5 additional epochs. There was still slight confusion between Italian and Spanish, but overall the model performed really well.
+
+I do not think that increasing the LSTM models really helps us learn to distinguish amongst the languages. The biggest jumps were increasing the hidden and embedded layers along with increasing the epochs. Both of which have different pros and cons... If we increase the hidden and embedded layers, we allow the model to have a bigger space to learn the data and pass weights. However, when we increase epochs, we constrain the model, but we allow more iterations through the data to learn. I am not sure which is the best route, but there is definitely a difference in the computing time required between increasing hidden/embedded layers versus increasing epochs.

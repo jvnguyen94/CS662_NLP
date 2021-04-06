@@ -113,7 +113,8 @@ def sentence_to_tensor(s, vocab, pad_with_bos=False):
     s_list = sentence_to_vector(s, vocab, pad_with_bos)
 
     ## Convert to tensor obj
-    s_tensor = torch.Tensor([s_list])
+    s_tensor = torch.LongTensor([s_list])
+    # s_tensor = torch.Tensor(s_list, dtype=torch.long)
 
     return s_tensor
 

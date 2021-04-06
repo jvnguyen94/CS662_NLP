@@ -6,36 +6,61 @@ import matplotlib.pyplot as plt
 import itertools
 from hw3_utils import vocab
 
+
 class LangID(nn.Module):
     def __init__(self, input_vocab_n, embedding_dims, hidden_dims, lstm_layers, output_class_n):
         super(LangID, self).__init__()
-        
+
         # Saving this so that other parts of the class can re-use it
         self.lstm_dims = hidden_dims
         self.lstm_layers = lstm_layers
-        
+
         # Our input embedding layer:
-        self.input_lookup = nn.Embedding(num_embeddings=input_vocab_n, embedding_dim=embedding_dims)
-        
+        self.input_lookup = nn.Embedding(
+            num_embeddings=input_vocab_n, embedding_dim=embedding_dims)
+
         # Note the use of batch_first in the LSTM initialization- this has to do with the layout of the
         # data we use as its input. See the docs for more details
-        self.lstm = nn.LSTM(input_size=embedding_dims, hidden_size=hidden_dims, num_layers=lstm_layers, batch_first=True)
-        
+        self.lstm = nn.LSTM(input_size=embedding_dims, hidden_size=hidden_dims,
+                            num_layers=lstm_layers, batch_first=True)
+
         # The output softmax classifier: first, the linear layer:
-        self.output = nn.Linear(in_features=hidden_dims, out_features=output_class_n)
-        
+        self.output = nn.Linear(in_features=hidden_dims,
+                                out_features=output_class_n)
+
         # Then, the actual log-softmaxing:
         # Note that we are using LogSoftmax here, since we want to use negative log-likelihood as our loss function.
         self.softmax = nn.LogSoftmax(dim=2)
-        
+
     # Expects a (1, n) tensor where n equals the length of the input sentence in characters
     # Will return a (output_class_n) tensor- one slot in the first dimension for each possible output class
     def forward(self, sentence_tensor):
-        raise NotImplementedError
+        ## embedding
+        out = self.input_lookup(sentence_tensor)
+        # print(out.shape)
+        ## test with 1x10 and pass through the model to see if i get what is expected dim-wise
+   
+        ## LSTM model
+        # out = self.lstm(out)
+        #out, (hidden, cell) = self.lstm(out)
+        out, self.hidden = self.lstm(out)
+        # print(out.shape)
+
+        ## LINEAR layer
+        out = self.output(out)
+        # print(out.shape)
+
+        ## Softmax
+        out = self.softmax(out)
+        # print(out.shape)
+        
+        ## Squeeze will remove the 1st dim then access last dim
+        return out.squeeze()[-1]
+        
 
     # When we call the forward() method on a PyTorch RNN, we need to provide it with the previous
     # time-point's hidden state (or hidden and memory states, in the case of an LSTM).
-    # 
+    #
     # When the network has not seen any data (i.e., we're looking at a new training example), we can
     # either give it zeroes for its initial hidden value, or random noise. Random noise is a bit better,
     # generally, so we'll start with that.
@@ -43,6 +68,7 @@ class LangID(nn.Module):
         h0 = torch.randn(self.lstm_layers, 1, self.lstm_dims)
         c0 = torch.randn(self.lstm_layers, 1, self.lstm_dims)
         return (h0, c0)
+
 
 def predict_one(model, s, c2i, i2l):
     """
@@ -52,14 +78,28 @@ def predict_one(model, s, c2i, i2l):
     See https://pytorch.org/tutorials/beginner/blitz/autograd_tutorial.html#gradients for discussion
     
     :param model: The LangID model to use for prediction
-    :param s: The sentence to pss through, as a string
+    :param s: The sentence to pass through, as a string
     :param c2i: The dictionary to use to map from character to index
     :param i2l: The dictionary for mapping from output index to label
     :returns: The predicted label for s
     :rtype: str
     """
-    raise NotImplementedError
-    
+    ## We don't care about gradients along the way of training... 
+    ## just taking the output/tracking that
+    with torch.no_grad():
+        ## 1) take s and put into tensor
+        s_tensor = vocab.sentence_to_tensor(s, c2i)
+        ## 2) pass it through the model
+        pred_tensor = model(s_tensor)
+        ## 3) grab index of the highest score
+        pred_score = torch.argmax(pred_tensor).item()
+        
+        ## Match index to label
+        pred = i2l[pred_score]
+
+        ## return label
+        return pred
+
 
 def eval_acc(model, test_data, c2i, i2c, l2i, i2l):
     """
@@ -70,7 +110,30 @@ def eval_acc(model, test_data, c2i, i2c, l2i, i2l):
     :returns: The classification accuracy (n_correct / n_total), as well as the predictions
     :rtype: tuple(float, list(str))
     """
-    raise NotImplementedError
+    ## sentences
+    sent_list = test_data['sentence'].to_list()
+    ## true labels
+    labels = test_data['lang'].to_list()
+
+    ## count correct & keep track of the predicted label
+    correct = 0
+    pred = []
+
+    ## iterate through sentence and predict.
+    ## track correct counter and the predicted label.
+    for ii in range(len(sent_list)):
+        temp_pred = predict_one(model, sent_list[ii], c2i, i2l)
+        if temp_pred == labels[ii]:
+            correct = correct+1
+        pred.append(temp_pred)
+
+    ## calculate accuracy
+    acc = correct/len(labels)
+
+    ## return acc and pred_labels
+    return (acc, pred)
+
+
 
 
 #####################################

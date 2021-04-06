@@ -1,0 +1,8 @@
+For this portion of the assignment, I trained a model with embedding dimension of 2 and hidden dimension of 2.
+
+The first thing that I noticed was that the average per-item loss was not drastically different compared to the original dimensions of embedded = 10 and hidden = 20.
+The accuracy from the low dimension model was only 53%, so it only did very slightly better than random chance.
+
+I did not noticed much by eye when I looked at the 'deliverable_2.4.csv' file. However, I did generate a confuson matrix from the true and predicted labels. What I saw was that the model defaulted to predicting 'eng' over 'spa' labels. Of all true 'eng' labels, the model performed with accuracy of 92%. Of all true 'spa' labels, the model performed with an accuracy of 13.5%.
+
+That means when I decreased the hidden and embedded layers, the model was not able to learn the Spanish labels as well. We need more hidden and embedded layers to flush out the difference between 'eng' and 'spa' labels.
